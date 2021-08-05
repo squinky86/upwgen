@@ -38,12 +38,12 @@ void PrintHelp()
 {
 	cout << "Unspeakable Password Generator Version 0.0.1." << endl;
 	cout << "Usage: upwgen [-sclnefh] [password size] [password quantity]" << endl;
-	cout << "\t-s Include at least 1 symbol" << endl;
-	cout << "\t-c Include at least 1 English capital letter" << endl;
-	cout << "\t-l Include at least 1 English lowercase letter" << endl;
-	cout << "\t-n Include at least 1 invisible character" << endl;
-	cout << "\t-e Include at least 1 emoji" << endl;
-	cout << "\t-f Include at least 1 foreign language character" << endl;
+	cout << "\t-s Exclude at least 1 symbol" << endl;
+	cout << "\t-c Exclude at least 1 English capital letter" << endl;
+	cout << "\t-l Exclude at least 1 English lowercase letter" << endl;
+	cout << "\t-n Exclude at least 1 invisible character" << endl;
+	cout << "\t-e Exclude at least 1 emoji" << endl;
+	cout << "\t-f Exclude at least 1 foreign language character" << endl;
 	cout << "Default size: 17" << endl;
 	cout << "Default quantity: 1" << endl;
 }
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 		Require(&e, &keyspace, passwords, qty, tmpKeyspace);
 	}
 
-	while (passwords[0].length() < size)
+	while (passwords[0].length() < static_cast<unsigned long>(size))
 		Require(&e, &keyspace, passwords, qty, keyspace, false);
 
 	//shuffle passwords
