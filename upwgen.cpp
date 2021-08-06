@@ -41,6 +41,7 @@ void PrintHelp()
 	cout << "\t-s Exclude at least 1 symbol" << endl;
 	cout << "\t-c Exclude at least 1 English capital letter" << endl;
 	cout << "\t-l Exclude at least 1 English lowercase letter" << endl;
+	cout << "\t-d Exclude at least 1 digit/number" << endl;
 	cout << "\t-n Exclude at least 1 invisible character" << endl;
 	cout << "\t-e Exclude at least 1 emoji" << endl;
 	cout << "\t-f Exclude at least 1 foreign language character" << endl;
@@ -65,6 +66,7 @@ int main(int argc, char *argv[])
 	bool requireSymbol = true;
 	bool requireCap = true;
 	bool requireLower = true;
+	bool requireDigit = true;
 	bool requireNonprint = true;
 	bool requireEmoji = true;
 	bool requireForeign = true;
@@ -88,6 +90,8 @@ int main(int argc, char *argv[])
 			requireCap = false;
 		else if (strcmp("-l", argv[i]) == 0)
 			requireLower = false;
+		else if (strcmp("-d", argv[i]) == 0)
+			requireDigit = false;
 		else if (strcmp("-n", argv[i]) == 0)
 			requireNonprint = false;
 		else if (strcmp("-e", argv[i]) == 0)
@@ -151,6 +155,12 @@ int main(int argc, char *argv[])
 	if (requireLower)
 	{
 		Require(&e, &keyspace, passwords, qty, U"abcdefghijklmnopqrstuvwxyz");
+	}
+
+	//require digit
+	if (requireDigit)
+	{
+		Require(&e, &keyspace, passwords, qty, U"0123456789");
 	}
 
 	//require nonprintable
