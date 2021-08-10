@@ -27,6 +27,18 @@
 
 using namespace std;
 
+//pulled from https://stackoverflow.com/questions/5698002/how-does-one-securely-clear-stdstring/59179980#59179980
+// Pointer to memset is volatile so that compiler must de-reference
+// the pointer and can't assume that it points to any function in
+// particular (such as memset, which it then might further "optimize")
+typedef void* (*memset_t)(void*, int, size_t);
+
+static volatile memset_t memset_func = memset;
+
+void cleanse(void* ptr, size_t len) {
+	memset_func(ptr, 0, len);
+}
+
 //codecvt destructor is not public in GCC; template out
 template<class I, class E, class S>
 struct codecvt2 : std::codecvt<I, E, S>
@@ -297,7 +309,9 @@ int main(int argc, char *argv[])
 	{
 		cout << i+1 << ": |" << conv32.to_bytes(passwords[i]) << "|" << endl;
 		//zeroize password
-		fill(begin(passwords[i]), end(passwords[i]), U'0');
+		passwords[i].resize(passwords[i].capacity(), 0);
+		cleanse(&passwords[i][0], passwords[i].size());
+		passwords[i].clear();
 	}
 
 	return EXIT_SUCCESS;
