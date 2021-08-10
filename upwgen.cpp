@@ -38,7 +38,7 @@ struct codecvt2 : std::codecvt<I, E, S>
 void PrintHelp()
 {
 	cout << "Unspeakable Password Generator Version 0.0.1." << endl;
-	cout << "Usage: upwgen [-sclnefh] [password size] [password quantity]" << endl;
+	cout << "Usage: upwgen [-sclnefgh] [password size] [password quantity]" << endl;
 	cout << "\t-s Exclude at least 1 symbol" << endl;
 	cout << "\t-c Exclude at least 1 English capital letter" << endl;
 	cout << "\t-l Exclude at least 1 English lowercase letter" << endl;
@@ -46,7 +46,8 @@ void PrintHelp()
 	cout << "\t-n Exclude at least 1 invisible character" << endl;
 	cout << "\t-e Exclude at least 1 emoji" << endl;
 	cout << "\t-f Exclude at least 1 extinct language character" << endl;
-	cout << "Default size: 17" << endl;
+	cout << "\t-f Exclude at least 1 gamepiece" << endl;
+	cout << "Default size: 15" << endl;
 	cout << "Default quantity: 1" << endl;
 }
 
@@ -78,6 +79,7 @@ int main(int argc, char *argv[])
 	bool requireNonprint = true;
 	bool requireEmoji = true;
 	bool requireExtinct = true;
+	bool requireGame = true;
 
 	//collection of possible characters to randomly choose from
 	u32string keyspace;
@@ -106,6 +108,8 @@ int main(int argc, char *argv[])
 			requireEmoji = false;
 		else if (strcmp("-f", argv[i]) == 0)
 			requireExtinct = false;
+		else if (strcmp("-g", argv[i]) == 0)
+			requireGame = false;
 		else if (strcmp("-h", argv[i]) == 0)
 		{
 			PrintHelp();
@@ -123,9 +127,9 @@ int main(int argc, char *argv[])
 	}
 
 	//set sane defaults
-	if (size < 0)
-		size = 17;
-	if (qty < 0)
+	if (size < 1)
+		size = 15;
+	if (qty < 1)
 		qty = 1;
 
 	bool err = false;
@@ -181,6 +185,8 @@ int main(int argc, char *argv[])
 
 		Require(&e, &keyspace, passwords, qty, tmpKeyspace);
 	}
+
+	//require emoji
 	if (requireEmoji)
 	{
 		u32string tmpKeyspace;
@@ -189,6 +195,8 @@ int main(int argc, char *argv[])
 
 		Require(&e, &keyspace, passwords, qty, tmpKeyspace);
 	}
+
+	//require an extinct language
 	if (requireExtinct)
 	{
 		u32string tmpKeyspace;
@@ -233,6 +241,43 @@ int main(int argc, char *argv[])
 			default:
 				break;
 		}
+
+		Require(&e, &keyspace, passwords, qty, tmpKeyspace);
+	}
+
+	//require a gamepiece
+	if (requireGame)
+	{
+		u32string tmpKeyspace;
+		//chess pieces
+		for (char32_t i = u'\u2654'; i <= u'\u265F'; i++)
+			tmpKeyspace += i;
+
+		//chess symbols
+		for (char32_t i = U'\U0001FA00'; i <= U'\U0001FA53'; i++)
+			tmpKeyspace += i;
+
+		//Mahjong
+		for (char32_t i = U'\U0001F000'; i <= U'\U0001F02B'; i++)
+			tmpKeyspace += i;
+
+		//domino
+		for (char32_t i = U'\U0001F030'; i <= U'\U0001F093'; i++)
+			tmpKeyspace += i;
+
+		//cards
+		for (char32_t i = U'\U0001F0A0'; i <= U'\U0001F0AE'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U0001F0B1'; i <= U'\U0001F0BF'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U0001F0C1'; i <= U'\U0001F0CF'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U0001F0D1'; i <= U'\U0001F0F5'; i++)
+			tmpKeyspace += i;
+
+		//Xiangqi
+		for (char32_t i = U'\U0001FA60'; i <= U'\U0001FA6D'; i++)
+			tmpKeyspace += i;
 
 		Require(&e, &keyspace, passwords, qty, tmpKeyspace);
 	}
