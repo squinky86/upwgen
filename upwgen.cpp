@@ -25,6 +25,10 @@
 #include <locale>
 #include <random>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 using namespace std;
 
 //pulled from https://stackoverflow.com/questions/5698002/how-does-one-securely-clear-stdstring/59179980#59179980
@@ -329,6 +333,10 @@ int main(int argc, char *argv[])
 
 	//print passwords
 	wstring_convert<codecvt2<char32_t, char, std::mbstate_t>, char32_t> conv32;
+#ifdef _WIN32
+	SetConsoleOutputCP(CP_UTF8);
+	setvbuf(stdout, nullptr, _IOFBF, 1000);
+#endif
 	for (int i = 0; i < qty; i++)
 	{
 		cout << i+1 << ": |" << conv32.to_bytes(passwords[i]) << "|" << endl;
