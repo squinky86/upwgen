@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 	{
 		u32string tmpKeyspace;
 		//choose a random foreign language
-		uniform_int_distribution<int> u(0, 5);
+		uniform_int_distribution<int> u(0, 7);
 		switch (u(e))
 		{
 			case 0: //Gothic
@@ -247,6 +247,30 @@ int main(int argc, char *argv[])
 
 			case 5: //Hieroglyphics
 				for (char32_t i = U'\U00013000'; i <= U'\U000130FF'; i++)
+					tmpKeyspace += i;
+				break;
+
+			case 6: //Vithkuqi
+				for (char32_t i = U'\U00010570'; i <= U'\U0001057A'; i++)
+					tmpKeyspace += i;
+				for (char32_t i = U'\U0001057C'; i <= U'\U0001058A'; i++)
+					tmpKeyspace += i;
+				for (char32_t i = U'\U0001058C'; i <= U'\U00010592'; i++)
+					tmpKeyspace += i;
+				for (char32_t i = U'\U00010594'; i <= U'\U00010595'; i++)
+					tmpKeyspace += i;
+				for (char32_t i = U'\U00010597'; i <= U'\U000105A1'; i++)
+					tmpKeyspace += i;
+				for (char32_t i = U'\U000105A3'; i <= U'\U000105B1'; i++)
+					tmpKeyspace += i;
+				for (char32_t i = U'\U000105B3'; i <= U'\U000105B9'; i++)
+					tmpKeyspace += i;
+				for (char32_t i = U'\U000105BB'; i <= U'\U000105BC'; i++)
+					tmpKeyspace += i;
+				break;
+
+			case 7: //Cypro-Minoan
+				for (char32_t i = U'\U00012F90'; i <= U'\U00012FF2'; i++)
 					tmpKeyspace += i;
 				break;
 
