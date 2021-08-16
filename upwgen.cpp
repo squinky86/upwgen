@@ -61,8 +61,8 @@ void PrintHelp()
 	cout << "\t-d Exclude at least 1 digit/number" << endl;
 	cout << "\t-n Exclude at least 1 invisible character" << endl;
 	cout << "\t-e Exclude at least 1 emoji" << endl;
-	cout << "\t-f Exclude at least 1 extinct language character" << endl;
-	cout << "\t-f Exclude at least 1 gamepiece" << endl;
+	cout << "\t-x Exclude at least 1 extinct language character" << endl;
+	cout << "\t-g Exclude at least 1 gamepiece" << endl;
 	cout << "Default size: 15" << endl;
 	cout << "Default quantity: 1" << endl;
 }
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 			requireNonprint = false;
 		else if (strcmp("-e", argv[i]) == 0)
 			requireEmoji = false;
-		else if (strcmp("-f", argv[i]) == 0)
+		else if (strcmp("-x", argv[i]) == 0)
 			requireExtinct = false;
 		else if (strcmp("-g", argv[i]) == 0)
 			requireGame = false;
