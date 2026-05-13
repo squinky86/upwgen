@@ -86,7 +86,7 @@ void to_utf8(const SecureU32String& input, SecureString& output) {
 void PrintHelp()
 {
 	cout << "Unspeakable Password Generator Version 0.0.1." << endl;
-	cout << "Usage: upwgen [-scldnexgh] [password size] [password quantity]" << endl;
+	cout << "Usage: upwgen [-scldnexgmoh] [password size] [password quantity]" << endl;
 	cout << "\t-s Disable symbols" << endl;
 	cout << "\t-c Disable English capital letters" << endl;
 	cout << "\t-l Disable English lowercase letters" << endl;
@@ -95,6 +95,8 @@ void PrintHelp()
 	cout << "\t-e Disable emojis" << endl;
 	cout << "\t-x Disable extinct language characters" << endl;
 	cout << "\t-g Disable gamepieces" << endl;
+	cout << "\t-m Disable diacritical marks" << endl;
+	cout << "\t-o Disable other languages/scripts (e.g. Braille)" << endl;
 	cout << "Default size: 15" << endl;
 	cout << "Default quantity: 1" << endl;
 }
@@ -129,6 +131,8 @@ int main(int argc, char *argv[])
 	bool requireEmoji = true;
 	bool requireExtinct = true;
 	bool requireGame = true;
+	bool requireDiacritical = true;
+	bool requireOther = true;
 
 	//collection of possible characters to randomly choose from
 	SecureU32String keyspace;
@@ -158,6 +162,10 @@ int main(int argc, char *argv[])
 			requireExtinct = false;
 		else if (strcmp("-g", argv[i]) == 0)
 			requireGame = false;
+		else if (strcmp("-m", argv[i]) == 0)
+			requireDiacritical = false;
+		else if (strcmp("-o", argv[i]) == 0)
+			requireOther = false;
 		else if (strcmp("-h", argv[i]) == 0)
 		{
 			PrintHelp();
@@ -230,6 +238,16 @@ int main(int argc, char *argv[])
 		Require(e, &keyspace, passwords, qty, tmpKeyspace);
 	}
 
+	//require diacritical marks
+	if (requireDiacritical)
+	{
+		SecureU32String tmpKeyspace;
+		for (char32_t i = U'\U00000300'; i <= U'\U0000036F'; i++)
+			tmpKeyspace += i;
+
+		Require(e, &keyspace, passwords, qty, tmpKeyspace);
+	}
+
 	//require emoji
 	if (requireEmoji)
 	{
@@ -244,72 +262,69 @@ int main(int argc, char *argv[])
 	if (requireExtinct)
 	{
 		SecureU32String tmpKeyspace;
-		//choose a random foreign language
-		uniform_int_distribution<int> u(0, 7);
-		switch (u(e))
-		{
-			case 0: //Gothic
-				for (char32_t i = U'\U00010330'; i <= U'\U0001034A'; i++)
-					tmpKeyspace += i;
-				break;
+		//Gothic
+		for (char32_t i = U'\U00010330'; i <= U'\U0001034A'; i++)
+			tmpKeyspace += i;
+		//Ugaritic
+		for (char32_t i = U'\U00010380'; i <= U'\U0001039D'; i++)
+			tmpKeyspace += i;
+		//Avestan
+		for (char32_t i = U'\U00010B00'; i <= U'\U00010B35'; i++)
+			tmpKeyspace += i;
+		//Parthian/Pahlavi
+		for (char32_t i = U'\U00010B40'; i <= U'\U00010B55'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U00010B60'; i <= U'\U00010B72'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U00010B80'; i <= U'\U00010B91'; i++)
+			tmpKeyspace += i;
+		//Cuneiform
+		for (char32_t i = U'\U00012000'; i <= U'\U000120FF'; i++)
+			tmpKeyspace += i;
+		//Hieroglyphics
+		for (char32_t i = U'\U00013000'; i <= U'\U000130FF'; i++)
+			tmpKeyspace += i;
+		//Vithkuqi
+		for (char32_t i = U'\U00010570'; i <= U'\U0001057A'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U0001057C'; i <= U'\U0001058A'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U0001058C'; i <= U'\U00010592'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U00010594'; i <= U'\U00010595'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U00010597'; i <= U'\U000105A1'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U000105A3'; i <= U'\U000105B1'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U000105B3'; i <= U'\U000105B9'; i++)
+			tmpKeyspace += i;
+		for (char32_t i = U'\U000105BB'; i <= U'\U000105BC'; i++)
+			tmpKeyspace += i;
+		//Cypro-Minoan
+		for (char32_t i = U'\U00012F90'; i <= U'\U00012FF2'; i++)
+			tmpKeyspace += i;
+		//Runic
+		for (char32_t i = U'\U000016A0'; i <= U'\U000016FF'; i++)
+			tmpKeyspace += i;
+		//Ogham
+		for (char32_t i = U'\U00001680'; i <= U'\U0000169F'; i++)
+			tmpKeyspace += i;
+		//Linear B
+		for (char32_t i = U'\U00010000'; i <= U'\U0001007F'; i++)
+			tmpKeyspace += i;
 
-			case 1: //Ugaritic
-				for (char32_t i = U'\U00010380'; i <= U'\U0001039D'; i++)
-					tmpKeyspace += i;
-				break;
+		Require(e, &keyspace, passwords, qty, tmpKeyspace);
+	}
 
-			case 2: //Avestan
-				for (char32_t i = U'\U00010B00'; i <= U'\U00010B35'; i++)
-					tmpKeyspace += i;
-				break;
-
-			case 3: //Parthian/Pahlavi
-				for (char32_t i = U'\U00010B40'; i <= U'\U00010B55'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U00010B60'; i <= U'\U00010B72'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U00010B80'; i <= U'\U00010B91'; i++)
-					tmpKeyspace += i;
-				break;
-
-			case 4: //Cuneiform
-				for (char32_t i = U'\U00012000'; i <= U'\U000120FF'; i++)
-					tmpKeyspace += i;
-				break;
-
-			case 5: //Hieroglyphics
-				for (char32_t i = U'\U00013000'; i <= U'\U000130FF'; i++)
-					tmpKeyspace += i;
-				break;
-
-			case 6: //Vithkuqi
-				for (char32_t i = U'\U00010570'; i <= U'\U0001057A'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U0001057C'; i <= U'\U0001058A'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U0001058C'; i <= U'\U00010592'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U00010594'; i <= U'\U00010595'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U00010597'; i <= U'\U000105A1'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U000105A3'; i <= U'\U000105B1'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U000105B3'; i <= U'\U000105B9'; i++)
-					tmpKeyspace += i;
-				for (char32_t i = U'\U000105BB'; i <= U'\U000105BC'; i++)
-					tmpKeyspace += i;
-				break;
-
-			case 7: //Cypro-Minoan
-				for (char32_t i = U'\U00012F90'; i <= U'\U00012FF2'; i++)
-					tmpKeyspace += i;
-				break;
-
-			default:
-				break;
-		}
-
+	//require other scripts
+	if (requireOther)
+	{
+		SecureU32String tmpKeyspace;
+		//Braille
+		for (char32_t i = U'\U00002800'; i <= U'\U000028FF'; i++)
+			tmpKeyspace += i;
+			
 		Require(e, &keyspace, passwords, qty, tmpKeyspace);
 	}
 
