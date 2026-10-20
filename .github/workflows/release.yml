@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
       - name: Require a version tag
@@ -95,7 +95,7 @@ jobs:
           New-Item -ItemType Directory -Path artifacts | Out-Null
           Copy-Item build/Release/upwgen.exe "artifacts/upwgen-$version-windows-x64.exe"
           Compress-Archive -Path staging/* -DestinationPath "artifacts/upwgen-$version-windows-x64.zip" -CompressionLevel Optimal
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows-x64
           path: artifacts/*
@@ -136,7 +136,7 @@ jobs:
           sudo dpkg --install "$package"
           upwgen --version
           upwgen generate --profile portable --length 24 --count 2 --format raw
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ubuntu-26.04-amd64
           path: build/*.deb
@@ -148,7 +148,7 @@ jobs:
     needs: [windows, ubuntu]
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: artifacts
           merge-multiple: true
@@ -165,7 +165,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: artifacts
           merge-multiple: true
