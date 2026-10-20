@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux GCC
+            os: ubuntu-26.04
+            configure: -DCMAKE_BUILD_TYPE=Release
+          - name: macOS Clang
+            os: macos-14
+            configure: -DCMAKE_BUILD_TYPE=Release
+          - name: Windows MSVC x64
+            os: windows-2025
+            configure: -A x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Configure
+        run: cmake -S . -B build ${{ matrix.configure }} -DBUILD_TESTING=ON
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Check installation
+        run: cmake --install build --config Release --prefix staging
+
+  sanitizers:
+    name: Linux address and undefined-behavior sanitizers
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DUPWGEN_SANITIZERS=ON -DBUILD_TESTING=ON
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+
+  unicode-and-web:
+    name: Unicode reproducibility and browser logic
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Verify pinned Unicode sources and generated output
+        run: python3 scripts/generate_unicode_data.py --check
+      - name: Test Unicode profile properties
+        run: python3 -m unittest discover -s tests -p 'test_unicode_data.py' -v
+      - name: Test browser generator and analyzer
+        run: node --test tests/web*.mjs

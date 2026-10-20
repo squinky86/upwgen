@@ -1,0 +1,79 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/pages.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/browser_smoke.mjs"
+  pull_request:
+    paths:
+      - "docs/**"
+      - ".github/workflows/pages.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/browser_smoke.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Build Jekyll documentation and browser tools
+        uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697 # v1
+        with:
+          source: ./docs
+          destination: ./_site
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install browser test tools
+        run: npm ci --ignore-scripts
+      - name: Install Chromium for browser checks
+        run: npx playwright-core install --with-deps chromium
+      - name: Test built site, clipboard, analyzer, privacy, and mobile layout
+        run: npm run test:browser
+      - name: Save browser screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pages-browser-screenshots
+          path: test-results/*.png
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: ./_site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-26.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

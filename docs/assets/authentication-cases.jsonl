@@ -1,0 +1,16 @@
+{"id":"ascii-baseline","value":"Public-test-123!","purpose":"ASCII reference value; public test data only","code_points":16,"utf8_bytes":16,"nfc_changed":false}
+{"id":"canonical-composed","value":"Caf\u00e9","purpose":"Canonical equivalence with canonical-decomposed","code_points":4,"utf8_bytes":5,"nfc_changed":false,"nfc":"Caf\u00e9"}
+{"id":"canonical-decomposed","value":"Cafe\u0301","purpose":"Combining accent; NFC composes two code points","code_points":5,"utf8_bytes":6,"nfc_changed":true,"nfc":"Caf\u00e9"}
+{"id":"combining-reorder","value":"a\u0301\u0323","purpose":"Normalization reorders and composes combining marks","code_points":3,"utf8_bytes":5,"nfc_changed":true}
+{"id":"leading-space","value":" Public-test-123!","purpose":"Detect leading-space stripping","code_points":17,"utf8_bytes":17,"nfc_changed":false}
+{"id":"trailing-space","value":"Public-test-123! ","purpose":"Detect trailing-space stripping","code_points":17,"utf8_bytes":17,"nfc_changed":false}
+{"id":"nbsp","value":"A\u00a0B","purpose":"Non-breaking space; NFKC maps it to ASCII space","code_points":3,"utf8_bytes":4,"nfc_changed":false}
+{"id":"zero-width-space","value":"A\u200bB","purpose":"Default-ignorable character; detect filtering","code_points":3,"utf8_bytes":5,"nfc_changed":false}
+{"id":"tag-character","value":"A\udb40\udc61B","purpose":"Supplementary default-ignorable TAG LATIN SMALL LETTER A","code_points":3,"utf8_bytes":6,"nfc_changed":false}
+{"id":"braille-blank","value":"A\u2800B","purpose":"Blank glyph that is not Unicode whitespace","code_points":3,"utf8_bytes":5,"nfc_changed":false}
+{"id":"supplementary","value":"A\ud83d\ude00B","purpose":"Three code points, four UTF-16 units, six UTF-8 bytes","code_points":3,"utf8_bytes":6,"nfc_changed":false}
+{"id":"emoji-zwj","value":"\ud83d\udc69\u200d\ud83d\udcbb","purpose":"Emoji sequence: one grapheme in conforming modern renderers","code_points":3,"utf8_bytes":11,"nfc_changed":false}
+{"id":"compatibility-ligature","value":"\ufb03","purpose":"NFKC expands the ligature to ffi","code_points":1,"utf8_bytes":3,"nfc_changed":false}
+{"id":"supplementary-15","value":"\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00","purpose":"15 code points, 30 UTF-16 units, 60 bytes","code_points":15,"utf8_bytes":60,"nfc_changed":false}
+{"id":"supplementary-16","value":"\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00","purpose":"16 code points, 32 UTF-16 units, 64 bytes","code_points":16,"utf8_bytes":64,"nfc_changed":false}
+{"id":"supplementary-17","value":"\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00","purpose":"17 code points, 34 UTF-16 units, 68 bytes","code_points":17,"utf8_bytes":68,"nfc_changed":false}

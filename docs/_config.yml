@@ -1,0 +1,17 @@
+title: upwgen
+description: "Cryptographic password generation and a local Unicode analyzer."
+url: "https://squinky86.github.io"
+baseurl: "/upwgen"
+version: "0.1.0"
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: document

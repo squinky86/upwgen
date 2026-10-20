@@ -1,0 +1,14 @@
+/build*/
+/dist/
+/_site/
+/docs/_site/
+/docs/.jekyll-cache/
+/docs/.jekyll-metadata
+/.bundle/
+/vendor/bundle/
+/node_modules/
+/test-results/
+*.deb
+*.zip
+*.exe
+__pycache__/

@@ -1,0 +1,18 @@
+Unicode Character Database version 16.0.0
+https://www.unicode.org/Public/16.0.0/ucd/UCD.zip
+Archive SHA-256: c86dd81f2b14a43b0cc064aa5f89aa7241386801e35c59c7984e579832634eb2
+
+The source text files are unmodified members of that official archive.
+Individual file checksums are in SHA256SUMS.
+
+Unicode license (retrieved 2026-10-20):
+https://www.unicode.org/license.txt
+
+Regenerate checked-in C++ and browser data:
+  python3 scripts/generate_unicode_data.py
+
+Verify source integrity and reproducibility without writing:
+  python3 scripts/generate_unicode_data.py --check
+
+The generator reads these pinned files directly. It never uses the host
+Python Unicode database and requires no network access.

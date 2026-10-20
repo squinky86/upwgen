@@ -1,0 +1,96 @@
+---
+layout: default
+title: Generate passwords. Decode Unicode.
+description: A local-first password generator and Unicode analyzer. Cryptographic randomness, explicit character sets, and a closer look at every code point.
+---
+<main id="main-content" class="site-main">
+  <div class="site-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> UNSPEAKABLE PASSWORD GENERATOR <span class="version">v0.1.0</span></p>
+        <h1 id="page-title">Generate passwords.<br><span>Decode Unicode.</span></h1>
+        <p class="intro-copy">Cryptographic randomness. Characters with context.<br>Two useful tools, running entirely in your browser.</p>
+      </div>
+      <div class="intro-note"><span class="terminal-prefix" aria-hidden="true">&gt;_</span><p>No accounts. No uploads.<br>Your text stays on this device.</p><a href="{{ '/guide/' | relative_url }}">Read the field guide <span aria-hidden="true">↗</span></a></div>
+    </section>
+
+    <noscript><p class="notice error">These tools need JavaScript. The documentation and native command-line generator remain available in the navigation.</p></noscript>
+    <p id="data-status" class="notice" role="status">Loading the Unicode character database…</p>
+
+    <div class="tool-grid">
+      <section id="generator" class="tool-panel" aria-labelledby="generator-title">
+        <div class="panel-heading"><span class="panel-number" aria-hidden="true">01</span><div><p class="eyebrow">CREATE / CRYPTOGRAPHIC RANDOMNESS</p><h2 id="generator-title">Password generator</h2></div><span class="panel-icon" aria-hidden="true">✳</span></div>
+        <form id="generator-form" novalidate>
+          <fieldset class="profile-options">
+            <legend>Choose a character profile</legend>
+            <div class="profile-tabs">
+              <label><input type="radio" name="profile" value="portable" checked><span>Portable</span></label>
+              <label><input type="radio" name="profile" value="unicode"><span>Unicode</span></label>
+              <label><input type="radio" name="profile" value="unspeakable"><span>Unspeakable</span></label>
+            </div>
+            <p id="profile-description" class="field-help">ASCII letters, digits, and symbols. A practical starting point for real credentials.</p>
+          </fieldset>
+          <div class="form-row">
+            <label class="input-field" for="password-length"><span>Length <small>code points</small></span><input id="password-length" name="length" type="number" min="1" max="1024" value="24" inputmode="numeric" required aria-describedby="length-help"></label>
+            <label class="input-field count-field" for="password-count"><span>Count <small>1–50</small></span><input id="password-count" name="count" type="number" min="1" max="50" value="1" inputmode="numeric" required></label>
+          </div>
+          <p id="length-help" class="field-help">Length counts code points; visible characters and byte length may differ.</p>
+          <details class="advanced-options">
+            <summary>Character sets &amp; constraints <span aria-hidden="true">+</span></summary>
+            <div class="advanced-content">
+              <p class="field-help">Allowed sets form the character pool. Required sets must appear in every result.</p>
+              <div class="set-header"><span>Character set</span><span>Allow</span><span>Require</span></div>
+              <div id="character-sets"></div>
+              <label class="input-field byte-field" for="max-bytes"><span>Maximum UTF-8 bytes <small>optional</small></span><input id="max-bytes" name="maxBytes" type="number" min="1" max="4096" inputmode="numeric" placeholder="No limit"></label>
+              <p class="field-help">Strict combinations may be impractical to sample. No result is returned unless every constraint is met.</p>
+            </div>
+          </details>
+          <button id="generate-button" class="button button-primary" type="submit" disabled><span aria-hidden="true">↻</span> Generate password<span id="generate-plural" aria-hidden="true"></span><span class="button-arrow" aria-hidden="true">→</span></button>
+          <p id="generation-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+        <div class="result-heading"><span class="eyebrow">OUTPUT</span><div class="output-actions"><label class="escape-toggle"><input id="escape-output" type="checkbox"> Show escapes</label><button id="clear-passwords" type="button" class="text-button" hidden>Clear</button><button id="copy-all" type="button" class="text-button" hidden>Copy all</button></div></div>
+        <div id="password-results" class="password-results" aria-label="Generated passwords">
+          <div class="empty-state"><span aria-hidden="true">[ ready ]</span><p>Your next password starts here.</p><small>Generate, copy, and save it in your password manager.</small></div>
+        </div>
+        <p class="privacy-note"><span aria-hidden="true">◈</span> Uses your browser’s cryptographic random source. Never stored or sent.</p>
+      </section>
+
+      <section id="analyzer" class="tool-panel" aria-labelledby="analyzer-title">
+        <div class="panel-heading"><span class="panel-number" aria-hidden="true">02</span><div><p class="eyebrow">INSPECT / EVERY CODE POINT</p><h2 id="analyzer-title">Unicode analyzer</h2></div><span class="panel-icon" aria-hidden="true">⌕</span></div>
+        <form id="analyzer-form">
+          <label class="input-field" for="analysis-input"><span>Text to inspect <small>processed locally</small></span><textarea id="analysis-input" name="text" rows="6" maxlength="32768" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Paste text, an emoji, or something you can’t quite see…" aria-describedby="analyzer-help"></textarea></label>
+          <div class="sample-row"><span>Try a sample:</span><button type="button" class="sample-button" data-sample="accent" disabled>Café</button><button type="button" class="sample-button" data-sample="emoji" disabled>👩‍💻</button><button type="button" class="sample-button" data-sample="hidden" disabled>Hidden text</button></div>
+          <p id="analyzer-help" class="field-help">Reveal names, scripts, invisible characters, encoding, and normalization. Up to 32,768 UTF-16 units; the first 256 code points are listed.</p>
+          <button id="analyze-button" class="button button-secondary" type="submit" disabled><span aria-hidden="true">⌕</span> Analyze text<span class="button-arrow" aria-hidden="true">→</span></button>
+          <p id="analysis-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+        <dl class="analysis-stats" aria-label="Text measurements">
+          <div><dt>Code points</dt><dd id="stat-codepoints">—</dd></div>
+          <div><dt>Graphemes</dt><dd id="stat-graphemes">—</dd></div>
+          <div><dt>UTF-8 bytes</dt><dd id="stat-bytes">—</dd></div>
+          <div><dt>UTF-16 units</dt><dd id="stat-utf16">—</dd></div>
+        </dl>
+        <div class="analyzer-explainer"><span class="eyebrow">ONE GLYPH ≠ ONE CODE POINT</span><p><span class="example-glyph" aria-hidden="true">é</span> An accented letter can be one code point, or a letter followed by a combining mark. It looks the same. The analyzer shows the difference.</p><a href="{{ '/unicode/' | relative_url }}">Understand Unicode <span aria-hidden="true">↗</span></a></div>
+        <p class="privacy-note"><span aria-hidden="true">◈</span> Nothing you paste leaves your browser. No analytics or external scripts.</p>
+      </section>
+    </div>
+
+    <section id="analysis-results" class="tool-panel analysis-results" aria-labelledby="analysis-results-title" hidden>
+      <div class="analysis-results-heading"><div><p class="eyebrow">TEXT / UNDER THE SURFACE</p><h2 id="analysis-results-title">Character breakdown</h2></div><button id="clear-analysis" type="button" class="text-button">Clear text &amp; results</button></div>
+      <p id="analysis-limit" class="field-help"></p>
+      <div id="normalization-results" class="normalization-results" aria-label="Whole-text normalization"></div>
+      <p class="field-help normalization-help">“Changes” compares the complete input after normalization. NFC is canonical composition; NFKC also folds compatibility distinctions. Normalization and grapheme segmentation use your browser’s Unicode implementation.</p>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Unicode code point details; scroll horizontally for all columns">
+        <table class="character-table"><caption class="visually-hidden">Each Unicode code point in the entered text, in order</caption><thead><tr><th scope="col">#</th><th scope="col">Glyph</th><th scope="col">Code point / name</th><th scope="col">Category / script</th><th scope="col">UTF-8 bytes</th><th scope="col">UTF-16</th><th scope="col">NFC</th></tr></thead><tbody id="character-rows"></tbody></table>
+      </div>
+      <p class="field-help">Combining marks use a dotted circle as a visual aid. Hidden characters use labels. Unicode names and properties: <span id="unicode-version">16.0.0</span>. <a href="{{ '/assets/unicode-LICENSE.txt' | relative_url }}">Unicode data license</a>.</p>
+    </section>
+
+    <section class="next-steps" aria-label="More about upwgen">
+      <a href="{{ '/guide/' | relative_url }}"><span class="eyebrow">01 / START HERE</span><h3>Pick the right profile <span aria-hidden="true">↗</span></h3><p>Practical passwords or difficult Unicode test cases. Know the difference.</p></a>
+      <a href="{{ '/cli/' | relative_url }}"><span class="eyebrow">02 / IN YOUR TERMINAL</span><h3>Take it to the command line <span aria-hidden="true">↗</span></h3><p>Native generation, structured output, and repeatable test corpora.</p></a>
+      <a href="{{ '/releases/' | relative_url }}"><span class="eyebrow">03 / OPEN SOURCE</span><h3>Get upwgen v0.1.0 <span aria-hidden="true">↗</span></h3><p>Windows x64 and Ubuntu 26.04 packages. Source included.</p></a>
+    </section>
+  </div>
+</main>
+<script type="module" id="tool-app" src="{{ '/assets/app.mjs' | relative_url }}" data-unicode-url="{{ '/assets/unicode-data.json' | relative_url }}"></script>

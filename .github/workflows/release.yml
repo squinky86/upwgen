@@ -1,0 +1,165 @@
+name: Release binaries
+
+on:
+  push:
+    tags:
+      - "[0-9]*.[0-9]*.[0-9]*"
+      - "v[0-9]*.[0-9]*.[0-9]*"
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release inputs
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Require a version tag
+        shell: bash
+        run: |
+          [[ "$GITHUB_REF_TYPE" == tag ]]
+          [[ "$GITHUB_REF_NAME" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]
+      - name: Verify pinned Unicode sources and generated output
+        run: python3 scripts/generate_unicode_data.py --check
+      - name: Test Unicode profile properties
+        run: python3 -m unittest discover -s tests -p 'test_unicode_data.py' -v
+      - name: Test browser generator and analyzer
+        run: node --test tests/web*.mjs
+      - name: Build website for integration checks
+        uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697 # v1
+        with:
+          source: ./docs
+          destination: ./_site
+      - name: Install browser test tools
+        run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright-core install --with-deps chromium
+      - name: Test complete browser workflows
+        run: npm run test:browser
+
+  windows:
+    name: Windows x64 production binary
+    needs: validate
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Configure x64 Release with static Microsoft runtime
+        run: cmake -S . -B build -A x64 -DBUILD_TESTING=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+      - name: Verify package version matches tag
+        shell: pwsh
+        run: |
+          $version = (Get-Content build/VERSION -Raw).Trim()
+          if ($env:GITHUB_REF_NAME.TrimStart('v') -ne $version) {
+            throw "The release tag must match the CMake project version."
+          }
+      - name: Build optimized binary
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Verify static runtime linkage
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installation = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $dumpbin = Get-ChildItem "$installation\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (!$dumpbin) { throw "Cannot find dumpbin to verify runtime dependencies." }
+          $dependencies = & $dumpbin.FullName /dependents build/Release/upwgen.exe
+          if ($LASTEXITCODE -ne 0) { throw "Cannot inspect binary dependencies." }
+          $dependencies
+          if ($dependencies -match '(?i)(VCRUNTIME|MSVCP|MSVCR)[0-9_]*.*\.dll') {
+            throw "The executable unexpectedly requires a Microsoft runtime redistributable."
+          }
+      - name: Package executable and documentation
+        shell: pwsh
+        run: |
+          cmake --install build --config Release --prefix staging
+          if ($LASTEXITCODE -ne 0) { throw "Installation failed." }
+          $version = (Get-Content build/VERSION -Raw).Trim()
+          New-Item -ItemType Directory -Path artifacts | Out-Null
+          Copy-Item build/Release/upwgen.exe "artifacts/upwgen-$version-windows-x64.exe"
+          Compress-Archive -Path staging/* -DestinationPath "artifacts/upwgen-$version-windows-x64.zip" -CompressionLevel Optimal
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-x64
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 7
+
+  ubuntu:
+    name: Ubuntu 26.04 LTS amd64 Debian package
+    needs: validate
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify Ubuntu release and architecture
+        shell: bash
+        run: |
+          source /etc/os-release
+          test "$ID" = ubuntu
+          test "$VERSION_ID" = 26.04
+          test "$(dpkg --print-architecture)" = amd64
+      - name: Configure Release
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+      - name: Verify package version matches tag
+        shell: bash
+        run: test "${GITHUB_REF_NAME#v}" = "$(tr -d '\r\n' < build/VERSION)"
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Build Debian package
+        working-directory: build
+        run: cpack -G DEB -C Release
+      - name: Install and smoke test the package
+        shell: bash
+        run: |
+          package="build/upwgen-$(tr -d '\r\n' < build/VERSION)-linux-amd64.deb"
+          dpkg-deb --info "$package"
+          sudo dpkg --install "$package"
+          upwgen --version
+          upwgen generate --profile portable --length 24 --count 2 --format raw
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ubuntu-26.04-amd64
+          path: build/*.deb
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish tested assets and SHA-256 checksums
+    needs: [windows, ubuntu]
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Create checksums
+        working-directory: artifacts
+        shell: bash
+        run: sha256sum -- *.deb *.exe *.zip > SHA256SUMS
+      - name: Attach assets before publishing the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --verify-tag --draft --title "upwgen ${GITHUB_REF_NAME#v}" --generate-notes
+          fi
+          gh release upload "$GITHUB_REF_NAME" artifacts/* --clobber
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest

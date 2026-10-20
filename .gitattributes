@@ -1,0 +1,5 @@
+# Preserve vendored-source checksums and generated output on all platforms.
+data/unicode/** text eol=lf
+include/upwgen/categories_generated.hpp text eol=lf
+docs/assets/unicode-data.json text eol=lf
+docs/assets/unicode-LICENSE.txt text eol=lf

@@ -1,0 +1,111 @@
+.TH UPWGEN 1 "October 2026" "upwgen 0.1.0" "User Commands"
+.SH NAME
+upwgen \- generate cryptographic passwords and Unicode authentication test data
+.SH SYNOPSIS
+.B upwgen
+.RI [ generate | corpus ]
+.RI [ options ]
+.RI [ length " [" count ]]
+.br
+.B upwgen
+.BR sets " | " help " | " version
+.SH DESCRIPTION
+upwgen generates one value at a time using operating-system cryptographic
+randomness. The default is one 24-code-point password from the portable ASCII
+profile, written as raw UTF-8 followed by a newline.
+Length counts Unicode code points, not UTF-8 bytes or displayed graphemes.
+.PP
+The portable profile includes ASCII letters, digits, and symbols.
+The unicode profile uses assigned, visible, NFC-stable characters from the
+Unicode 16.0.0 catalog.
+The unspeakable profile includes tag characters, combining marks, emoji,
+historic scripts, Braille, game symbols, and ASCII.
+The stress profile is an alias for unspeakable.
+.SH OPTIONS
+.TP
+.BI --profile " NAME"
+Select portable, unicode, or unspeakable.
+.TP
+.BI --length " N"
+Request exactly N code points, from 1 to 4096. Default: 24.
+.TP
+.BI --count " N"
+Generate N values, from 1 to 10000. Default: 1.
+Length multiplied by count must not exceed 1000000.
+.TP
+.BI --max-bytes " N"
+Limit each value to N UTF-8 bytes, from 1 to 16384.
+Impossible or excessively restrictive requests fail.
+.TP
+.BI --include " LIST"
+Replace the selected categories with a comma-separated list.
+The portable profile permits ASCII categories only.
+.TP
+.BI --exclude " LIST"
+Remove the listed categories.
+.TP
+.BI --require " LIST"
+Require at least one member of every listed, selected category.
+Selected categories are optional by default.
+.TP
+.BI --format " FORMAT"
+Choose raw, numbered, escaped, or jsonl.
+Raw output is one value per line with no metadata.
+Numbered output is for interactive display.
+Escaped output lists code points.
+JSONL emits one JSON object per value, including encoding lengths and category
+metadata.
+.TP
+.BI --seed " N"
+Corpus only: use an unsigned 64-bit seed. Default: zero.
+Seeded output is reproducible test data and must never be used for credentials.
+The generate command rejects this option.
+.TP
+.BR -h ", " --help
+Display usage.
+.TP
+.B --version
+Display release and Unicode data versions.
+.SH CATEGORIES
+symbols, upper, lower, digits, tags, combining, emoji, historic, braille, games.
+The sets command lists descriptions and profile counts.
+The unicode profile has no permitted tag or combining category members.
+.SH LEGACY OPTIONS
+Exclusion flags can be combined:
+-s symbols, -c upper, -l lower, -d digits, -n tags, -e emoji,
+-x historic, -g games, -m combining, and -o braille.
+Positional length and count remain accepted.
+Legacy options do not change the profile or require selected categories.
+.SH CORPUS
+The corpus command defaults to the unspeakable profile, JSONL output, and seed
+zero. It uses a portable SplitMix64 test generator. Its values are public test
+data, not secrets.
+.SH EXAMPLES
+.nf
+upwgen --length 32 --count 5
+upwgen --include upper,lower,digits --require digits
+upwgen --profile unicode --length 20 --max-bytes 64
+upwgen --profile unspeakable --format escaped
+upwgen corpus --seed 42 --count 100
+.fi
+.SH EXIT STATUS
+Zero indicates success. Nonzero indicates invalid input, entropy failure,
+allocation failure, output failure, or exhausted constrained-sampling limits.
+Diagnostics go to standard error. A failed streaming batch may have already
+emitted complete values; callers must check the exit status.
+.SH SECURITY
+Native generation uses getrandom on Linux, BCryptGenRandom on Windows, and
+arc4random_buf on Apple and BSD systems.
+Bounded random choices use rejection sampling.
+Requirements and byte limits reject entire candidates, preserving uniformity
+among accepted values. Sampling stops after 100000 candidates per value or
+4000000 sampled code points across a batch.
+.PP
+Secret buffers are cleared as a best-effort measure. Terminal history,
+redirected output, the operating system, and other applications can retain
+copies. Unicode passwords require testing through the entire authentication
+workflow; destinations may normalize, truncate, reject, or remove characters.
+.SH AUTHOR
+Jon Hood.
+.SH SEE ALSO
+Project documentation: https://squinky86.github.io/upwgen/
