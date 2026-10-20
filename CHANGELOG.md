@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Require all ten character categories by default in the website's Unspeakable profile.
+- Enable DISA ASD STIG length and composition rules by default in every web profile: at least 15 code points and ASCII uppercase, lowercase, digits, and symbols.
+- Show the enforced rules beside the generator, preserve an explicit custom mode, and clear old results when settings change.
+- Sample short passwords uniformly with exact completion counts so required categories remain practical at the minimum length.
+
 ## 0.1.0
 
 - Add a browser-local password generator and Unicode analyzer on GitHub Pages.

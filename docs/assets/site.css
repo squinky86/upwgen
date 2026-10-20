@@ -110,6 +110,10 @@ legend { padding: 0; font-size: 12px; color: #becdc2; margin-bottom: 10px; }
 .field-help { font-size: 11px; line-height: 1.7; color: var(--muted); margin: 9px 0 0; }
 .profile-options .field-help { min-height: 38px; margin-bottom: 18px; }
 .stress-description { color: var(--amber); }
+.composition-options { margin-top: 16px; padding: 13px; border: 1px solid var(--line); border-radius: 4px; background: var(--field); }
+.composition-options > label { display: flex; align-items: center; gap: 9px; font-size: 12px; line-height: 1.5; cursor: pointer; }
+.composition-options input { flex-shrink: 0; }
+.composition-options > a { display: inline-block; margin-top: 7px; }
 .form-row { display: flex; gap: 16px; align-items: start; }
 .input-field { display: block; flex: 1; min-width: 0; }
 .input-field > span { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; font-size: 12px; color: #becdc2; margin-bottom: 8px; }

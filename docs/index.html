@@ -31,10 +31,15 @@ description: A local-first password generator and Unicode analyzer. Cryptographi
             <p id="profile-description" class="field-help">ASCII letters, digits, and symbols. A practical starting point for real credentials.</p>
           </fieldset>
           <div class="form-row">
-            <label class="input-field" for="password-length"><span>Length <small>code points</small></span><input id="password-length" name="length" type="number" min="1" max="1024" value="24" inputmode="numeric" required aria-describedby="length-help"></label>
+            <label class="input-field" for="password-length"><span>Length <small>code points</small></span><input id="password-length" name="length" type="number" min="15" max="1024" value="24" inputmode="numeric" required aria-describedby="length-help composition-help"></label>
             <label class="input-field count-field" for="password-count"><span>Count <small>1–50</small></span><input id="password-count" name="count" type="number" min="1" max="50" value="1" inputmode="numeric" required></label>
           </div>
           <p id="length-help" class="field-help">Length counts code points; visible characters and byte length may differ.</p>
+          <div class="composition-options">
+            <label for="stig-composition"><input id="stig-composition" type="checkbox" checked aria-describedby="composition-help"> Require STIG length &amp; character rules</label>
+            <p id="composition-help" class="field-help">At least 15 code points, including ASCII uppercase, lowercase, a digit, and a symbol.</p>
+            <a class="field-help" href="{{ '/guide/#stig-length--character-rules' | relative_url }}">DISA rule references &amp; scope ↗</a>
+          </div>
           <details class="advanced-options">
             <summary>Character sets &amp; constraints <span aria-hidden="true">+</span></summary>
             <div class="advanced-content">

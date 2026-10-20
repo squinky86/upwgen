@@ -6,6 +6,8 @@ The Unspeakable Password Generator: cryptographic passwords, unusual Unicode, an
 
 The website generates passwords and analyzes pasted text entirely in your browser. It includes per-character Unicode names, scripts, encoding lengths, normalization diagnostics, and clipboard controls. No passwords or analyzer input are uploaded or saved.
 
+The website now requires **ASCII uppercase, lowercase, digits, and symbols**, with a **15-character minimum**, by default in every profile. Unspeakable also requires every Unicode category. Its default-on STIG option implements the DISA Application Security and Development password length and composition rules; see [the rule references and scope](https://squinky86.github.io/upwgen/guide/#stig-length--character-rules). Custom test policies remain available by turning that option off. Native 0.1.0 behavior is described below.
+
 ## Native quick start
 
 ```sh

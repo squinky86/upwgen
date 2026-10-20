@@ -1,14 +1,14 @@
-import { PROFILE_SETS, LIMITS, buildPolicy, createRandomSource, generatePassword, escapeCodePoints } from './generator.mjs';
+import { PROFILE_SETS, PROFILE_REQUIREMENTS, STIG_MIN_LENGTH, STIG_REQUIRED_SETS, LIMITS, buildPolicy, createRandomSource, generatePassword, escapeCodePoints } from './generator.mjs';
 import { createAnalyzer, analyzeText } from './analyzer.mjs';
 
 const $ = id => document.getElementById(id);
 const profileDescriptions = {
   portable: 'ASCII letters, digits, and symbols. A practical starting point for real credentials.',
   unicode: 'Assigned, visible Unicode characters. Confirm that your service and password manager preserve them.',
-  unspeakable: 'Authentication test data, including invisible tags and combining marks. Use this profile for stress testing.',
+  unspeakable: 'All ten character sets are required by default, including ASCII, invisible tags, and combining marks. Check Unicode compatibility before use.',
 };
 const setLabels = {
-  symbols: 'ASCII symbols', upper: 'Uppercase letters', lower: 'Lowercase letters', digits: 'Digits',
+  symbols: 'ASCII symbols', upper: 'ASCII uppercase (A–Z)', lower: 'ASCII lowercase (a–z)', digits: 'ASCII digits (0–9)',
   tags: 'Invisible tags', combining: 'Combining marks', emoji: 'Emoji',
   historic: 'Historic scripts', braille: 'Braille patterns', games: 'Game symbols',
 };
@@ -51,6 +51,7 @@ function renderSets() {
     require.type = 'checkbox';
     require.name = 'require';
     require.value = category.id;
+    require.checked = allow.checked && PROFILE_REQUIREMENTS[profile].includes(category.id);
     require.disabled = !allow.checked;
     require.setAttribute('aria-label', `Require ${label.textContent}`);
     allow.addEventListener('change', () => {
@@ -63,6 +64,32 @@ function renderSets() {
     rows.append(row);
   }
   $('character-sets').replaceChildren(rows);
+  updateCompositionControls();
+}
+function updateCompositionControls() {
+  const stig = $('stig-composition').checked;
+  $('password-length').min = stig ? String(STIG_MIN_LENGTH) : '1';
+  if (stig && /^[0-9]+$/.test($('password-length').value) && Number($('password-length').value) < STIG_MIN_LENGTH) {
+    $('password-length').value = String(STIG_MIN_LENGTH);
+  }
+  for (const id of STIG_REQUIRED_SETS) {
+    const allow = document.querySelector(`input[name="include"][value="${id}"]`);
+    const require = document.querySelector(`input[name="require"][value="${id}"]`);
+    if (!allow || !require) continue;
+    if (stig) {
+      allow.checked = true;
+      require.checked = true;
+    }
+    allow.disabled = stig;
+    require.disabled = stig || !allow.checked;
+  }
+  $('composition-help').textContent = stig
+    ? 'STIG length & character rules: at least 15 code points, including ASCII uppercase, lowercase, a digit, and a symbol. These four sets are locked as required.'
+    : 'Custom composition: STIG length & character rules are off. Adjust the required sets below for your destination or test case.';
+}
+function clearForPolicyChange() {
+  clearPasswords();
+  updateStatus('generation-status', '');
 }
 
 async function copyText(value, statusId, fallbackInput) {
@@ -147,6 +174,8 @@ $('generator-form').addEventListener('submit', async event => {
   if (!data || busy) return;
   busy = true;
   $('generate-button').disabled = true;
+  const policyInputs = [...$('generator-form').querySelectorAll('input')].map(input => [input, input.disabled]);
+  for (const [input] of policyInputs) input.disabled = true;
   clearPasswords();
   updateStatus('generation-status', 'Generating securely…');
   try {
@@ -154,6 +183,7 @@ $('generator-form').addEventListener('submit', async event => {
     const policy = buildPolicy(data, {
       profile: currentProfile(), length: $('password-length').value, count: $('password-count').value,
       maxBytes: $('max-bytes').value, include: selected('include'), require: selected('require'),
+      stig: $('stig-composition').checked,
     });
     const random = createRandomSource();
     const budget = { remaining: LIMITS.draws };
@@ -170,6 +200,7 @@ $('generator-form').addEventListener('submit', async event => {
     updateStatus('generation-status', error.message || 'Generation failed. Please try again.', true);
   } finally {
     busy = false;
+    for (const [input, disabled] of policyInputs) input.disabled = disabled;
     $('generate-button').disabled = false;
   }
 });
@@ -181,7 +212,15 @@ $('clear-passwords').addEventListener('click', () => {
   $('generate-button').focus();
 });
 $('copy-all').addEventListener('click', () => { void copyText(generated.map(result => result.value).join('\n'), 'generation-status'); });
-for (const radio of document.querySelectorAll('input[name="profile"]')) radio.addEventListener('change', () => { if (data) renderSets(); });
+for (const radio of document.querySelectorAll('input[name="profile"]')) radio.addEventListener('change', () => {
+  if (data) renderSets();
+  clearForPolicyChange();
+});
+$('stig-composition').addEventListener('change', () => {
+  updateCompositionControls();
+  clearForPolicyChange();
+});
+$('generator-form').addEventListener('input', clearForPolicyChange);
 
 function performAnalysis() {
   if (!lookup) return;

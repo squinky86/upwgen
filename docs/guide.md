@@ -17,9 +17,29 @@ Length means **Unicode code points**, not bytes or visible symbols. The generato
 | Unicode | Assigned, visible, NFC-stable characters from the catalog | Systems whose full Unicode password workflow you have tested |
 | Unspeakable | Historic scripts, game symbols, Braille, emoji, combining marks, tag characters, and ASCII | Authentication testing, demonstrations, and explicitly compatible destinations |
 
-Each selected category contributes to the allowed alphabet. Selecting a category does **not** require its presence in every result. Mark a category as required when a destination has a composition rule. Requiring many small categories in a short password can be expensive; the generator stops with an explanation when a policy cannot be sampled within its work limit.
+**The website requires ASCII uppercase, lowercase, digits, and symbols by default in every profile.** Unspeakable additionally requires at least one character from each of its six Unicode categories: tags, combining marks, emoji, historic scripts, Braille, and game symbols. Every Unspeakable result therefore includes all ten categories by default.
+
+Allowed sets contribute to the alphabet; required sets must appear in every result. Choosing another profile restores that profile's default sets. For custom test data, turn off **Require STIG length & character rules**, then adjust Allow and Require. Turning the option off keeps the current requirements until you change them. Editing settings clears previous results so they cannot be mistaken for results of the new policy. Strict byte limits can still exceed the sampler's work limit; generation fails rather than returning a password that misses a requirement.
 
 The default is **24 code points, one password, Portable**. Longer independent random strings increase the space an attacker must search. Exotic glyphs alone are not a measure of security.
+
+## STIG length & character rules
+
+The website enables this option by default in every profile. It enforces a minimum of **15 Unicode code points** and at least one of each ASCII character class: **A–Z, a–z, 0–9, and a symbol**. These four sets stay allowed and required while the option is enabled. Enabling the option raises a shorter length to 15; entering a shorter length afterward produces an error. An incompatible byte limit also produces an error.
+
+These checks implement the following password length and composition rules from the [DISA Application Security and Development STIG, V6R5](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_ASD_V6R5_STIG.zip), verified October 20, 2026:
+
+| Rule | Requirement |
+| --- | --- |
+| V-222536 / APSC-DV-001680 | Minimum 15 characters |
+| V-222537 / APSC-DV-001690 | At least one uppercase character |
+| V-222538 / APSC-DV-001700 | At least one lowercase character |
+| V-222539 / APSC-DV-001710 | At least one numeric character |
+| V-222540 / APSC-DV-001720 | At least one special character |
+
+This is a password composition option, not certification of a system's STIG compliance. The receiving system must enforce its applicable account, password history, lifetime, and authentication policies. Product-specific STIGs can impose other requirements. Unicode destinations may reject, normalize, or count characters differently; choose Portable for the broadest compatibility.
+
+The native **0.1.0 CLI** keeps its explicit requirement behavior. To request this length and composition baseline there, use `upwgen --profile portable --length 24 --require upper,lower,digits,symbols`.
 
 ## Inspect Unicode
 

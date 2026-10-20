@@ -23,7 +23,7 @@ NIST recommends that password verifiers accept Unicode and apply NFC normalizati
 
 Native secret generation draws from the operating system: Linux `getrandom`, Apple/BSD `arc4random_buf`, or Windows `BCryptGenRandom`. Browser generation uses Web Crypto `crypto.getRandomValues`. Neither silently falls back to a predictable source.
 
-Selection uses rejection sampling to avoid modulo bias. Whole-candidate rejection satisfies category and byte constraints without giving some valid strings extra weight. Constraints are bounded by a work limit so difficult policies cannot hang the application. No strength score is inferred from how unusual the output looks.
+Selection uses rejection sampling to avoid modulo bias. For short passwords with disjoint required sets, the browser counts valid completions using exact integers and selects uniformly among the satisfying strings. This makes all ten Unspeakable requirements practical even at length 15. Longer browser passwords and native generation use whole-candidate rejection; byte limits also reject whole candidates. These methods avoid giving some valid strings extra weight. Constraints are bounded by a work limit so difficult policies cannot hang the application. No strength score is inferred from how unusual the output looks.
 
 For independent uniform draws from an alphabet of size *A*, an unconstrained length-*L* string has *L × log₂(A)* bits of selection entropy. Requirements and encoding limits change that distribution's size; the application does not present the unconstrained formula as a guarantee for constrained outputs.
 
