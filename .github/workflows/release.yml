@@ -7,6 +7,9 @@ on:
       - "v[0-9]*.[0-9]*.[0-9]*"
   release:
     types: [published]
+  pull_request:
+    paths:
+      - ".github/workflows/release.yml"
   workflow_dispatch:
 
 permissions:
@@ -26,6 +29,7 @@ jobs:
         with:
           node-version: 22
       - name: Require a version tag
+        if: github.ref_type == 'tag'
         shell: bash
         run: |
           [[ "$GITHUB_REF_TYPE" == tag ]]
@@ -57,6 +61,7 @@ jobs:
       - name: Configure x64 Release with static Microsoft runtime
         run: cmake -S . -B build -A x64 -DBUILD_TESTING=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
       - name: Verify package version matches tag
+        if: github.ref_type == 'tag'
         shell: pwsh
         run: |
           $version = (Get-Content build/VERSION -Raw).Trim()
@@ -113,6 +118,7 @@ jobs:
       - name: Configure Release
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
       - name: Verify package version matches tag
+        if: github.ref_type == 'tag'
         shell: bash
         run: test "${GITHUB_REF_NAME#v}" = "$(tr -d '\r\n' < build/VERSION)"
       - name: Build
@@ -137,9 +143,24 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  verify-artifacts:
+    name: Verify release artifact downloads and checksums
+    needs: [windows, ubuntu]
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Create checksums for all release formats
+        working-directory: artifacts
+        shell: bash
+        run: sha256sum -- *.deb *.exe *.zip > SHA256SUMS
+
   publish:
     name: Publish tested assets and SHA-256 checksums
-    needs: [windows, ubuntu]
+    if: github.ref_type == 'tag' && github.event_name != 'pull_request'
+    needs: verify-artifacts
     runs-on: ubuntu-26.04
     permissions:
       contents: write

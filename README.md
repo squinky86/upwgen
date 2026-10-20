@@ -82,7 +82,7 @@ ctest --test-dir build-sanitize --output-on-failure
 
 The Pages and release workflows also test the built Jekyll site in Chromium: generation, exact clipboard contents, permission-denied fallback, Unicode analysis, malicious markup as text, offline operation, and mobile layout. To run that check locally, build `docs/` into `_site/`, run `npm ci`, install Chromium with `npx playwright-core install chromium`, then run `npm run test:browser`. `UPWGEN_BROWSER_EXECUTABLE` can select an already installed Chrome/Chromium binary.
 
-GitHub Actions tests native builds on Linux, macOS, and Windows and builds the Jekyll site from `docs/`. Release tags such as `0.1.0` trigger tested Windows x64 and Ubuntu 26.04 amd64 artifacts. The release is published only after its builds succeed.
+GitHub Actions tests native builds on Linux, macOS, and Windows and builds the Jekyll site from `docs/`. Release tags such as `0.1.0` trigger tested Windows x64 and Ubuntu 26.04 amd64 artifacts. The release is published only after its builds and artifact download checks succeed. Pull requests changing the release workflow run the same packaging checks without publishing. To validate packaging manually, run the **Release binaries** workflow with `workflow_dispatch` on `main`; branch runs build and test artifacts without creating a release or changing existing assets.
 
 ## Migration
 
